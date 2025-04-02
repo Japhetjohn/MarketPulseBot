@@ -10,11 +10,28 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Welcome to MarketPulse Bot! Use /pulse <token> for insights.")
+    welcome_message = (
+        "🚀 Welcome to MarketPulse Bot! 🚀\n"
+        "I provide real-time crypto analytics using Vybe APIs.\n\n"
+        "Here’s what I can do:\n"
+        "📊 /pulse <token> - Get live token data (e.g., /pulse SOL)\n"
+        "🔔 /alert <token> <condition> - Set custom alerts (e.g., /alert SOL volume>50)\n"
+        "📜 /history <token> - See historical trends (e.g., /history SOL)\n"
+        "❓ /help - Show this message\n\n"
+        "Start by trying /pulse SOL to see live data!"
+    )
+    bot.reply_to(message, welcome_message)
 
 @bot.message_handler(commands=['help'])
 def send_help(message):
-    bot.reply_to(message, "Commands:\n/pulse <token> - Live data\n/alert <token> <condition> - Set alert\n/history <token> - Past trends")
+    help_message = (
+        "📋 MarketPulse Bot Commands:\n"
+        "📊 /pulse <token> - Live token data (e.g., /pulse SOL)\n"
+        "🔔 /alert <token> <condition> - Set alerts (e.g., /alert SOL volume>50)\n"
+        "📜 /history <token> - Historical trends (e.g., /history SOL)\n"
+        "❓ /help - Show this message"
+    )
+    bot.reply_to(message, help_message)
 
 @bot.message_handler(commands=['pulse'])
 def send_pulse(message):
