@@ -2,7 +2,7 @@ import threading
 import time
 from vybe_api import get_token_pulse
 
-alerts = {}  # {chat_id: {"token": "SOL", "condition": "volume>50"}}
+alerts = {}
 
 def check_alerts(bot):
     while True:
@@ -11,16 +11,24 @@ def check_alerts(bot):
             condition = alert["condition"]
             data = get_token_pulse(token)
             try:
-                volume = float(data.split()[2])  # Parse volume from reply
+                volume_part = data.split()[2]
+                if "(dummy" in data:
+                    volume_part = volume_part.rstrip("(dummy")
+                if volume_part == "N/A":
+                    raise ValueError("Volume data not available")
+                # Remove any trailing punctuation (e.g., "1628519594238.5205.")
+                volume_part = volume_part.rstrip(".")
+                volume = float(volume_part)
                 threshold = float(condition.split(">")[1])
                 if volume > threshold:
                     bot.send_message(chat_id, f"Alert triggered: {data}")
                     del alerts[chat_id]
-            except (IndexError, ValueError):
-                pass  # Skip if parsing fails
-        time.sleep(60)  # Check every minute
+            except (IndexError, ValueError) as e:
+                bot.send_message(chat_id, f"Error with alert for {token}: {str(e)}")
+                del alerts[chat_id]
+        time.sleep(60)
 
 def start_alert_thread(bot):
     thread = threading.Thread(target=check_alerts, args=(bot,))
     thread.daemon = True
-    thread.start()  # Ensure this line is indented correctly
+    thread.start()
