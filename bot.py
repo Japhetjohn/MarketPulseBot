@@ -13,12 +13,12 @@ bot = telebot.TeleBot(BOT_TOKEN)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     welcome_message = (
-        "🚀 Welcome to MarketPulse Bot! 🚀\n"
+        "🚀 Welcome to MarketPulse Bot! 🚀\n\n"
         "I give you crypto data using Vybe APIs.\n\n"
-        "Here’s what I can do:\n"
-        "📊 /pulse <token> - See live volume (e.g., /pulse SOL)\n"
-        "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n"
-        "📜 /history <token> - See past prices (e.g., /history SOL)\n"
+        "Here’s what I can do:\n\n"
+        "📊 /pulse <token> - See live volume (e.g., /pulse SOL)\n\n"
+        "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n\n"
+        "📜 /history <token> - See past prices (e.g., /history SOL)\n\n"
         "❓ /help - Show this message\n\n"
         "Try /pulse SOL to start!"
     )
@@ -28,10 +28,10 @@ def send_welcome(message):
 @bot.message_handler(commands=['help'])
 def send_help(message):
     help_message = (
-        "📋 MarketPulse Bot Commands:\n"
-        "📊 /pulse <token> - Live volume (e.g., /pulse SOL)\n"
-        "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n"
-        "📜 /history <token> - Past prices (e.g., /history SOL)\n"
+        "📋 MarketPulse Bot Commands:\n\n"
+        "📊 /pulse <token> - Live volume (e.g., /pulse SOL)\n\n"
+        "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n\n"
+        "📜 /history <token> - Past prices (e.g., /history SOL)\n\n"
         "❓ /help - Show this message"
     )
     bot.reply_to(message, help_message)
@@ -71,3 +71,4 @@ def send_history(message):
 if __name__ == "__main__":
     start_alert_thread(bot)
     bot.polling()
+  
