@@ -4,7 +4,7 @@ A Telegram bot for crypto data using Vybe APIs, built for the Vybe Telegram Bot 
 
 ## Overview
 
-MarketPulse Bot provides real-time and historical crypto data for Solana tokens directly on Telegram. It’s designed for traders and DeFi users, offering live volume, historical prices, and volume-based alerts. The bot is built in Python using the Telebot library, integrates with Vybe APIs, and is hosted on Render with UptimeRobot for reliability.
+MarketPulse Bot provides real-time and historical crypto data for Solana tokens directly on Telegram. It’s designed for traders and DeFi users, offering live volume, historical prices, and volume-based alerts. The bot is built in Python using the Telebot library, integrates with Vybe APIs, and is hosted on Replit with UptimeRobot for reliability.
 
 ## Features
 
