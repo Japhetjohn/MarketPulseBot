@@ -3,19 +3,31 @@ from dotenv import load_dotenv
 import os
 from vybe_api import get_token_pulse, get_token_history
 from alerts import start_alert_thread, alerts
+from flask import Flask
+from threading import Thread
 
 # Load the .env file
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# Set up Flask app
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "MarketPulse Bot is alive!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
 # Welcome message with all commands
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     welcome_message = (
-        "🚀 Welcome to MarketPulse Bot! 🚀\n\n"
-        "I give you crypto data using Vybe APIs.\n\n"
-        "Here’s what I can do:\n\n"
+        "🚀 Welcome to MarketPulse Bot! 🚀\n"
+        "I give you crypto data using Vybe APIs.\n\n\n"
+        "Here’s what I can do:\n\n\n"
         "📊 /pulse <token> - See live volume (e.g., /pulse SOL)\n\n"
         "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n\n"
         "📜 /history <token> - See past prices (e.g., /history SOL)\n\n"
@@ -28,7 +40,7 @@ def send_welcome(message):
 @bot.message_handler(commands=['help'])
 def send_help(message):
     help_message = (
-        "📋 MarketPulse Bot Commands:\n\n"
+        "📋 MarketPulse Bot Commands:\n\n\n"
         "📊 /pulse <token> - Live volume (e.g., /pulse SOL)\n\n"
         "🔔 /alert <token> <condition> - Set volume alerts (e.g., /alert SOL volume>50)\n\n"
         "📜 /history <token> - Past prices (e.g., /history SOL)\n\n"
@@ -67,8 +79,15 @@ def send_history(message):
     except:
         bot.reply_to(message, "Please use: /history <token> (e.g., /history SOL)")
 
-# Start the bot
+# Start the bot and Flask server
 if __name__ == "__main__":
+    # Start Flask server in a separate thread
+    flask_thread = Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
+    
+    # Start the alert thread
     start_alert_thread(bot)
+    
+    # Start the bot polling
     bot.polling()
-  
