@@ -110,8 +110,10 @@ def send_whale_analysis(message):
     try:
         wallet_address = message.text.split()[1].strip()
         print(f"Wallet Address for /whale: {wallet_address}")  # Debugging log
+
         params = {"ownerAddress": wallet_address}
-        data = make_vybe_request("/account/known-accounts", params=params)
+        endpoint = "/account/known-accounts"
+        data = make_vybe_request(endpoint, params=params)
         print(f"API Response for /whale: {data}")  # Debugging log
 
         if "error" in data:
@@ -138,7 +140,7 @@ def send_whale_analysis(message):
 @bot.message_handler(commands=['holdings'])
 def send_holdings(message):
     try:
-        wallet_address = message.text.split()[1]
+        wallet_address = message.text.split()[1].strip()
         data = make_vybe_request(f"/account/token-balance/{wallet_address}")
         if "error" in data:
             bot.reply_to(message, data["error"])
@@ -159,8 +161,7 @@ def send_holdings(message):
 def send_transfers(message):
     try:
         wallet_address = message.text.split()[1].strip()
-        # Correctly call the transfers endpoint with the wallet address
-        data = make_vybe_request(f"/token/transfers", {"walletAddress": wallet_address})
+        data = get_transfers(wallet_address)
         
         if "error" in data:
             bot.reply_to(message, f"🚫 Error: {data['error']}")
@@ -186,7 +187,22 @@ def send_transfers(message):
         
         bot.reply_to(message, response, parse_mode="Markdown", disable_web_page_preview=True)
         print(f"API Response for /transfers: {data}")  # Debugging log
-
+        
+        if "error" in data:
+            bot.reply_to(message, data["error"])
+        elif not data or len(data.get('transfers', [])) == 0:
+            bot.reply_to(message, f"No transfers found for wallet: {wallet_address} in the last 30 days.")
+        else:
+            transfers = "\n\n".join([
+                f"Token: {transfer.get('mintAddress', 'Unknown')}\n"
+                f"Amount: {transfer.get('amount', 'N/A')} tokens\n"
+                f"From: {transfer.get('senderAddress', 'Unknown')}\n"
+                f"To: {transfer.get('receiverAddress', 'Unknown')}\n"
+                f"Value: ${float(transfer.get('valueUsd', 0)):.2f}\n"
+                f"Date: {datetime.fromtimestamp(transfer.get('blockTime', 0), tz=timezone.utc).strftime('%b %d, %Y %I:%M %p')}"
+                for transfer in data.get('transfers', [])
+            ])
+            bot.reply_to(message, f"Recent Transfers for Wallet `{wallet_address}`:\n\n{transfers}")
     except IndexError:
         bot.reply_to(message, "Please provide a wallet address. Example: /transfers <wallet_address>")
     except Exception as e:
@@ -198,8 +214,10 @@ def send_token_volume(message):
     try:
         token = message.text.split()[1].strip()
         print(f"Token for /volume: {token}")  # Debugging log
-        current_time = int(time.time())
-        one_week_ago = current_time - (7 * 24 * 60 * 60)
+
+        from time import time
+        current_time = int(time())
+        one_week_ago = current_time - (7 * 24 * 60 * 60)  # 7 days ago
 
         params = {
             "startTime": one_week_ago,
@@ -207,20 +225,19 @@ def send_token_volume(message):
             "interval": "1d",
             "limit": 7
         }
-        data = make_vybe_request(f"/token/{token}/transfer-volume", params=params)
+        endpoint = f"/token/{token}/transfer-volume"
+        data = make_vybe_request(endpoint, params=params)
         print(f"API Response for /volume: {data}")  # Debugging log
-        
+
         if "error" in data:
             bot.reply_to(message, f"Error: {data['error']}. Please check the token and try again.")
-        elif not data or len(data.get('data', [])) == 0:
+        elif not data or 'data' not in data:
             bot.reply_to(message, f"No volume data found for token: {token}. It might not be supported.")
         else:
-            volume_date = datetime.fromtimestamp(data["time"], tz=timezone.utc).strftime('%Y-%m-%d')
-            volume_usd = float(data["volume"])
+            total_volume = sum(entry["volume"] for entry in data["data"])
             response = (
                 f"📊 Token Volume for `{token}`:\n\n"
-                f"- Date: {volume_date}\n"
-                f"  Volume: ${volume_usd:,.2f}\n\n"
+                f"Total Volume over the past week: ${total_volume:,.2f}\n"
                 f"🔍 View more details on [AlphaVybe](https://alphavybe.com/token/{token})"
             )
             bot.reply_to(message, response, parse_mode="Markdown", disable_web_page_preview=True)
@@ -234,9 +251,13 @@ def send_token_volume(message):
 def send_token_history(message):
     try:
         token = message.text.split()[1].strip()
-        current_time = int(time.time())
-        one_month_ago = current_time - (30 * 24 * 60 * 60)
+        print(f"Token for /history: {token}")  # Debugging log
 
+        from time import time
+        current_time = int(time())
+        one_month_ago = current_time - (30 * 24 * 60 * 60)  # 30 days ago
+
+        endpoint = f"/price/{token}/token-ohlcv"
         params = {
             "mintAddress": token,
             "resolution": "1d",
@@ -244,7 +265,9 @@ def send_token_history(message):
             "timeEnd": current_time,
             "limit": 10
         }
-        data = make_vybe_request(f"/price/{token}/token-ohlcv", params=params)
+        print(f"API Request URL: https://api.vybenetwork.xyz{endpoint}")  # Debugging log
+
+        data = make_vybe_request(endpoint, params=params)
         print(f"API Response for /history: {data}")  # Debugging log
 
         if "error" in data:
@@ -290,11 +313,10 @@ def check_alerts():
                 continue
             for entry in data.get("data", []):
                 volume = float(entry.get("volume", 0))
-                if eval(f"{volume} {condition}"):
+                if eval(f"{volume} {condition}"):  # Evaluate the condition
                     bot.send_message(chat_id, f"🚨 Alert Triggered for {token}:\nCondition: {condition}\nVolume: {volume}")
                     alerts.remove(alert)
 
-# Schedule the alert checker to run every minute
 schedule.every(1).minutes.do(check_alerts)
 
 def run_scheduler():
