@@ -5,10 +5,9 @@ import requests
 from flask import Flask
 from threading import Thread
 import time
-import schedule  # For scheduling tasks
-from vybe_api import get_transfers
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton  # For reply keyboard
-from datetime import datetime, timezone  # For date formatting and timezone for UTC
+import schedule
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from datetime import datetime, timezone
 
 # Load environment variables
 load_dotenv()
@@ -26,7 +25,6 @@ def check_env_vars():
 
 # Initialize bot and Flask app
 check_env_vars()
-
 bot = telebot.TeleBot(BOT_TOKEN)
 app = Flask(__name__)
 
@@ -51,18 +49,29 @@ def make_vybe_request(endpoint, params=None, method="GET"):
             response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         return response.json()
-    except requests.exceptions.HTTPError:
-        return {"error": "We couldn't find the requested data. Please check your input and try again."}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP Error: {e.response.status_code}. Please check your input."}
     except requests.exceptions.RequestException:
-        return {"error": "There was a problem connecting to the server. Please try again later."}
+        return {"error": "Network error. Please try again later."}
 
-# Create a reply keyboard for commands
-def create_keyboard():
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(KeyboardButton("/pulse"), KeyboardButton("/whale"))
-    keyboard.add(KeyboardButton("/holdings"), KeyboardButton("/transfers"))
-    keyboard.add(KeyboardButton("/volume"), KeyboardButton("/history"))
-    keyboard.add(KeyboardButton("/alert"), KeyboardButton("/help"))
+# Create an inline keyboard for navigation
+def create_inline_keyboard():
+    keyboard = InlineKeyboardMarkup()
+    keyboard.row(
+        InlineKeyboardButton("Pulse", callback_data="cmd_pulse"),
+        InlineKeyboardButton("Whale", callback_data="cmd_whale")
+    )
+    keyboard.row(
+        InlineKeyboardButton("Holdings", callback_data="cmd_holdings"),
+        InlineKeyboardButton("Transfers", callback_data="cmd_transfers")
+    )
+    keyboard.row(
+        InlineKeyboardButton("Volume", callback_data="cmd_volume"),
+        InlineKeyboardButton("History", callback_data="cmd_history")
+    )
+    keyboard.row(
+        InlineKeyboardButton("Alert", callback_data="cmd_alert")
+    )
     return keyboard
 
 @bot.message_handler(commands=['start', 'help'])
@@ -77,213 +86,209 @@ def send_welcome(message):
         "• /volume <token> - Token volume stats\n"
         "• /history <token> - Price trends\n"
         "• /alert <token> <condition> - Custom alerts\n\n"
-        "🔍 Powered by [AlphaVybe](https://alphavybe.com)"
+        "🔍 Powered by [Vybe Network](https://vybenetwork.com)"
     )
-    bot.reply_to(message, welcome_message, parse_mode="Markdown", disable_web_page_preview=True)
-    bot.reply_to(message, welcome_message, reply_markup=create_keyboard())
+    bot.reply_to(message, welcome_message, parse_mode="Markdown", disable_web_page_preview=True, reply_markup=create_inline_keyboard())
 
 @bot.message_handler(commands=['pulse'])
 def send_wallet_analysis(message):
     try:
-        wallet_address = message.text.split()[1]
+        wallet_address = message.text.split()[1].strip()
+        sent_msg = bot.reply_to(message, "Fetching wallet data...")
         data = make_vybe_request(f"/account/token-balance/{wallet_address}")
         if "error" in data:
-            bot.reply_to(message, data["error"])
+            bot.edit_message_text(data["error"], chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('data', [])) == 0:
-            bot.reply_to(message, f"No data found for wallet: {wallet_address}")
+            bot.edit_message_text(f"No data found for wallet: {wallet_address}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
             total_value = data.get('totalTokenValueUsd', '0')
             token_count = data.get('totalTokenCount', '0')
-            bot.reply_to(
-                message,
-                f"📊 Wallet Analysis:\n"
-                f"- Total Value: ${total_value}\n"
-                f"- Total Tokens: {token_count}"
+            top_tokens = "\n".join([f"- {token['name']} ({token['symbol']}): {token['amount']} tokens" for token in data.get('data', [])[:3]])
+            bot.edit_message_text(
+                f"📊 *Wallet Analysis*:\n"
+                f"- Total Value: ${float(total_value):,.2f}\n"
+                f"- Total Tokens: {token_count}\n"
+                f"- Top Tokens:\n{top_tokens}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
             )
     except IndexError:
         bot.reply_to(message, "Please provide a wallet address. Example: /pulse <wallet_address>")
-    except Exception:
+    except Exception as e:
+        print(f"Error in /pulse: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 @bot.message_handler(commands=['whale'])
 def send_whale_analysis(message):
     try:
         wallet_address = message.text.split()[1].strip()
-        print(f"Wallet Address for /whale: {wallet_address}")  # Debugging log
-
+        sent_msg = bot.reply_to(message, "Checking whale activity...")
         params = {"ownerAddress": wallet_address}
-        endpoint = "/account/known-accounts"
-        data = make_vybe_request(endpoint, params=params)
-        print(f"API Response for /whale: {data}")  # Debugging log
-
+        data = make_vybe_request("/account/known-accounts", params=params)
         if "error" in data:
-            bot.reply_to(message, f"Error: {data['error']}. Please check the wallet address and try again.")
+            bot.edit_message_text(f"Error: {data['error']}. This wallet may not be a known whale.", chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('accounts', [])) == 0:
-            bot.reply_to(message, f"No whale activity found for wallet: {wallet_address}. It might not be tracked as a whale.")
+            bot.edit_message_text(
+                f"No whale activity found for wallet: {wallet_address}. Try a known whale address.\n\n"
+                f"🔍 Explore tokens at [Vybe Network](https://vybenetwork.com)",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
         else:
             accounts = data.get('accounts', [])
             whale_info = "\n\n".join([
-                f"🐋 **Whale Account**:\n"
-                f"- **Name**: {account.get('name', 'N/A')}\n"
-                f"- **Owner Address**: {account.get('ownerAddress', 'N/A')}\n"
-                f"- **Labels**: {', '.join(account.get('labels', []))}\n"
-                f"- **Date Added**: {account.get('dateAdded', 'N/A')}"
+                f"🐋 *Whale Account*:\n"
+                f"- Name: {account.get('name', 'N/A')}\n"
+                f"- Owner Address: {account.get('ownerAddress', 'N/A')}\n"
+                f"- Labels: {', '.join(account.get('labels', [])) or 'None'}\n"
+                f"- Date Added: {account.get('dateAdded', 'N/A')}"
                 for account in accounts
             ])
-            bot.reply_to(message, f"🐋 **Whale Activity for Wallet `{wallet_address}`**:\n\n{whale_info}")
+            bot.edit_message_text(
+                f"🐋 *Whale Activity for `{wallet_address}`*:\n\n{whale_info}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
     except IndexError:
         bot.reply_to(message, "Please provide a wallet address. Example: /whale <wallet_address>")
     except Exception as e:
-        print(f"Error in /whale command: {e}")  # Debugging log
+        print(f"Error in /whale: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 @bot.message_handler(commands=['holdings'])
 def send_holdings(message):
     try:
         wallet_address = message.text.split()[1].strip()
+        sent_msg = bot.reply_to(message, "Fetching holdings...")
         data = make_vybe_request(f"/account/token-balance/{wallet_address}")
         if "error" in data:
-            bot.reply_to(message, data["error"])
+            bot.edit_message_text(data["error"], chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('data', [])) == 0:
-            bot.reply_to(message, f"No holdings found for wallet: {wallet_address}")
+            bot.edit_message_text(f"No holdings found for wallet: {wallet_address}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
             holdings = "\n".join([
-                f"- {token['name']} ({token['symbol']}): {token['amount']} tokens"
+                f"- {token['name']} ({token['symbol']}): {float(token['amount']):,.2f} tokens"
                 for token in data.get('data', [])
             ])
-            bot.reply_to(message, f"💰 Token Holdings:\n{holdings}")
+            bot.edit_message_text(
+                f"💰 *Token Holdings*:\n{holdings}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
     except IndexError:
         bot.reply_to(message, "Please provide a wallet address. Example: /holdings <wallet_address>")
-    except Exception:
+    except Exception as e:
+        print(f"Error in /holdings: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 @bot.message_handler(commands=['transfers'])
 def send_transfers(message):
     try:
         wallet_address = message.text.split()[1].strip()
-        data = get_transfers(wallet_address)
-        
+        sent_msg = bot.reply_to(message, "Fetching transfers...")
+        params = {"walletAddress": wallet_address, "limit": 5}
+        data = make_vybe_request("/token/transfers", params=params)
         if "error" in data:
-            bot.reply_to(message, f"🚫 Error: {data['error']}")
-            return
-            
-        transfers = data.get("transfers", [])
-        if not transfers:
-            bot.reply_to(message, "No recent transfers found for this wallet.")
-            return
-            
-        response = "🔄 *Recent Transfers*\n\n"
-        for tx in transfers[:5]:  # Show only top 5 transfers
-            amount = float(tx.get("amount", 0))
-            value_usd = float(tx.get("valueUsd", 0))
-            response += (
-                f"💸 *Transfer*\n"
-                f"Amount: {amount:,.2f} tokens\n"
-                f"Value: ${value_usd:,.2f}\n"
-                f"From: `{tx['senderAddress'][:8]}...`\n"
-                f"To: `{tx['receiverAddress'][:8]}...`\n\n"
-            )
-        response += "\n🔍 View more details on [AlphaVybe](https://alphavybe.com/address/" + wallet_address + ")"
-        
-        bot.reply_to(message, response, parse_mode="Markdown", disable_web_page_preview=True)
-        print(f"API Response for /transfers: {data}")  # Debugging log
-        
-        if "error" in data:
-            bot.reply_to(message, data["error"])
+            bot.edit_message_text(f"Error: {data['error']}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('transfers', [])) == 0:
-            bot.reply_to(message, f"No transfers found for wallet: {wallet_address} in the last 30 days.")
+            bot.edit_message_text(f"No recent transfers found for wallet: {wallet_address}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
             transfers = "\n\n".join([
-                f"Token: {transfer.get('mintAddress', 'Unknown')}\n"
-                f"Amount: {transfer.get('amount', 'N/A')} tokens\n"
-                f"From: {transfer.get('senderAddress', 'Unknown')}\n"
-                f"To: {transfer.get('receiverAddress', 'Unknown')}\n"
-                f"Value: ${float(transfer.get('valueUsd', 0)):.2f}\n"
-                f"Date: {datetime.fromtimestamp(transfer.get('blockTime', 0), tz=timezone.utc).strftime('%b %d, %Y %I:%M %p')}"
+                f"💸 *Transfer*:\n"
+                f"- Token: {transfer.get('mintAddress', 'Unknown')}\n"
+                f"- Amount: {float(transfer.get('amount', 0)):.2f} tokens\n"
+                f"- Value: ${float(transfer.get('valueUsd', 0)):.2f}\n"
+                f"- From: `{transfer.get('senderAddress', 'Unknown')[:8]}...`\n"
+                f"- To: `{transfer.get('receiverAddress', 'Unknown')[:8]}...`\n"
+                f"- Date: {datetime.fromtimestamp(transfer.get('blockTime', 0), tz=timezone.utc).strftime('%b %d, %Y %I:%M %p')}"
                 for transfer in data.get('transfers', [])
             ])
-            bot.reply_to(message, f"Recent Transfers for Wallet `{wallet_address}`:\n\n{transfers}")
+            bot.edit_message_text(
+                f"🔄 *Recent Transfers for `{wallet_address}`*:\n\n{transfers}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
     except IndexError:
         bot.reply_to(message, "Please provide a wallet address. Example: /transfers <wallet_address>")
     except Exception as e:
-        print(f"Error in /transfers command: {e}")  # Debugging log
-        bot.reply_to(message, "Something went wrong. Please try again later.")
+        print(f"Error in /transfers: {e}")
+        bot.edit_message_text("Something went wrong. Please try again later.", chat_id=message.chat.id, message_id=sent_msg.message_id)
 
 @bot.message_handler(commands=['volume'])
 def send_token_volume(message):
     try:
         token = message.text.split()[1].strip()
-        print(f"Token for /volume: {token}")  # Debugging log
-
-        from time import time
-        current_time = int(time())
-        one_week_ago = current_time - (7 * 24 * 60 * 60)  # 7 days ago
-
-        params = {
-            "startTime": one_week_ago,
-            "endTime": current_time,
-            "interval": "1d",
-            "limit": 7
-        }
-        endpoint = f"/token/{token}/transfer-volume"
-        data = make_vybe_request(endpoint, params=params)
-        print(f"API Response for /volume: {data}")  # Debugging log
-
+        sent_msg = bot.reply_to(message, "Fetching volume...")
+        current_time = int(time.time())
+        one_week_ago = current_time - (7 * 24 * 60 * 60)
+        params = {"startTime": one_week_ago, "endTime": current_time, "interval": "1d", "limit": 7}
+        data = make_vybe_request(f"/token/{token}/transfer-volume", params=params)
         if "error" in data:
-            bot.reply_to(message, f"Error: {data['error']}. Please check the token and try again.")
-        elif not data or 'data' not in data:
-            bot.reply_to(message, f"No volume data found for token: {token}. It might not be supported.")
+            bot.edit_message_text(f"Error: {data['error']}. Ensure the token address is valid.", chat_id=message.chat.id, message_id=sent_msg.message_id)
+        elif not data or 'data' not in data or len(data['data']) == 0:
+            bot.edit_message_text(f"No volume data found for token: {token}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
-            total_volume = sum(entry["volume"] for entry in data["data"])
-            response = (
-                f"📊 Token Volume for `{token}`:\n\n"
-                f"Total Volume over the past week: ${total_volume:,.2f}\n"
-                f"🔍 View more details on [AlphaVybe](https://alphavybe.com/token/{token})"
+            total_volume = sum(float(entry["volume"]) for entry in data["data"])
+            bot.edit_message_text(
+                f"📊 *Token Volume for `{token}`*:\n\n"
+                f"Total Volume (7 days): ${total_volume:,.2f}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
             )
-            bot.reply_to(message, response, parse_mode="Markdown", disable_web_page_preview=True)
     except IndexError:
-        bot.reply_to(message, "Please provide a token. Example: /volume <token>")
+        bot.reply_to(message, "Please provide a token address. Example: /volume <token>")
     except Exception as e:
-        print(f"Error in /volume command: {e}")  # Debugging log
+        print(f"Error in /volume: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 @bot.message_handler(commands=['history'])
 def send_token_history(message):
     try:
         token = message.text.split()[1].strip()
-        print(f"Token for /history: {token}")  # Debugging log
-
-        from time import time
-        current_time = int(time())
-        one_month_ago = current_time - (30 * 24 * 60 * 60)  # 30 days ago
-
-        endpoint = f"/price/{token}/token-ohlcv"
-        params = {
-            "mintAddress": token,
-            "resolution": "1d",
-            "timeStart": one_month_ago,
-            "timeEnd": current_time,
-            "limit": 10
-        }
-        print(f"API Request URL: https://api.vybenetwork.xyz{endpoint}")  # Debugging log
-
-        data = make_vybe_request(endpoint, params=params)
-        print(f"API Response for /history: {data}")  # Debugging log
-
+        sent_msg = bot.reply_to(message, "Fetching price history...")
+        current_time = int(time.time())
+        one_week_ago = current_time - (7 * 24 * 60 * 60)
+        params = {"resolution": "1d", "timeStart": one_week_ago, "timeEnd": current_time, "limit": 5}
+        data = make_vybe_request(f"/price/{token}/token-ohlcv", params=params)
         if "error" in data:
-            bot.reply_to(message, f"Error: {data['error']}. Please check the token and try again.")
+            bot.edit_message_text(f"Error: {data['error']}. Ensure the token address is valid.", chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('data', [])) == 0:
-            bot.reply_to(message, f"No historical price data found for token: {token}. Please ensure the token is valid and has recorded transactions.")
+            bot.edit_message_text(f"No price history found for token: {token}", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
             history = "\n".join([
-                f"- Date: {datetime.fromtimestamp(entry.get('time', 0), tz=timezone.utc).strftime('%Y-%m-%d')} | Open: {entry['open']} | Close: {entry['close']} | High: {entry['high']} | Low: {entry['low']}"
-                for entry in data.get('data', [])
+                f"- {datetime.fromtimestamp(entry.get('time', 0), tz=timezone.utc).strftime('%Y-%m-%d')}: "
+                f"Open: ${float(entry['open']):.2f}, Close: ${float(entry['close']):.2f}"
+                for entry in data.get('data', [])[:5]
             ])
-            bot.reply_to(message, f"📈 Token Price History:\n{history}")
+            bot.edit_message_text(
+                f"📈 *Price History for `{token}`*:\n\n{history}\n\n"
+                f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id,
+                parse_mode="Markdown",
+                disable_web_page_preview=True
+            )
     except IndexError:
-        bot.reply_to(message, "Please provide a token. Example: /history <token>")
+        bot.reply_to(message, "Please provide a token address. Example: /history <token>")
     except Exception as e:
-        print(f"Error in /history command: {e}")  # Debugging log
+        print(f"Error in /history: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 @bot.message_handler(commands=['alert'])
@@ -295,27 +300,45 @@ def set_alert(message):
             return
         token = parts[1].upper()
         condition = " ".join(parts[2:])
+        if not any(op in condition for op in [">", "<", "=="]):
+            bot.reply_to(message, "Condition must include >, <, or ==. Example: /alert USDC >1000")
+            return
         chat_id = message.chat.id
         if chat_id not in user_alerts:
             user_alerts[chat_id] = []
         user_alerts[chat_id].append({"token": token, "condition": condition})
-        bot.reply_to(message, f"✅ Alert set for {token} when {condition}.")
-    except Exception:
+        bot.reply_to(message, f"✅ Alert set for {token} when {condition}.", reply_markup=create_inline_keyboard())
+    except Exception as e:
+        print(f"Error in /alert: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
 
 def check_alerts():
     for chat_id, alerts in user_alerts.items():
-        for alert in alerts:
+        for alert in alerts[:]:  # Copy to avoid modification issues
             token = alert["token"]
             condition = alert["condition"]
-            data = make_vybe_request(f"/token/{token}/transfer-volume")
-            if "error" in data or not data:
+            current_time = int(time.time())
+            one_day_ago = current_time - (24 * 60 * 60)
+            params = {"startTime": one_day_ago, "endTime": current_time, "interval": "1h"}
+            data = make_vybe_request(f"/token/{token}/transfer-volume", params=params)
+            if "error" in data or not data or 'data' not in data:
                 continue
             for entry in data.get("data", []):
                 volume = float(entry.get("volume", 0))
-                if eval(f"{volume} {condition}"):  # Evaluate the condition
-                    bot.send_message(chat_id, f"🚨 Alert Triggered for {token}:\nCondition: {condition}\nVolume: {volume}")
+                op, value = condition.split()
+                value = float(value)
+                if (op == ">" and volume > value) or (op == "<" and volume < value) or (op == "==" and abs(volume - value) < 0.01):
+                    bot.send_message(
+                        chat_id,
+                        f"🚨 *Alert Triggered for {token}*:\n"
+                        f"Condition: Volume {op} ${value:,.2f}\n"
+                        f"Current Volume: ${volume:,.2f}\n\n"
+                        f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                        parse_mode="Markdown",
+                        disable_web_page_preview=True
+                    )
                     alerts.remove(alert)
+                    break
 
 schedule.every(1).minutes.do(check_alerts)
 
@@ -323,6 +346,13 @@ def run_scheduler():
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+# Inline keyboard callback handler
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    cmd = call.data.split("_")[1]
+    bot.answer_callback_query(call.id)
+    bot.send_message(call.message.chat.id, f"Please provide an address or token for /{cmd}. Example: /{cmd} <address>")
 
 # Start the bot and Flask server
 if __name__ == "__main__":
