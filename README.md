@@ -1,294 +1,138 @@
-MarketPulseBot
+# MarketPulseBot
+
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 MarketPulseBot is a Telegram bot for the Vybe Telegram Bot Challenge, delivering real-time Solana blockchain analytics using Vybe Network APIs. It provides wallet analysis, whale tracking, token transfers, volume stats, price trends, and custom alerts, with a user-friendly inline keyboard and robust error handling. Hosted on Render for 24/7 availability, it’s open-source (MIT) and designed for traders, analysts, and Solana enthusiasts.
 
-Table of Contents
+---
 
+## Table of Contents
 
+- [Features](#features)
+- [Metrics Provided](#metrics-provided)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Example Outputs](#example-outputs)
+- [Deployment](#deployment)
+- [Troubleshooting](#troubleshooting)
+- [Vybe API Integration](#vybe-api-integration)
+- [Why MarketPulseBot?](#why-marketpulsebot)
+- [Contributing](#contributing)
+- [License](#license)
 
+---
 
-
-Features
-
-
-
-Metrics Provided
-
-
-
-Prerequisites
-
-
-
-Installation
-
-
-
-Usage
-
-
-
-Example Outputs
-
-
-
-Deployment
-
-
-
-Troubleshooting
-
-
-
-Vybe API Integration
-
-
-
-Why MarketPulseBot?
-
-
-
-License
-
-Features
+## Features
 
 MarketPulseBot offers the following commands, each leveraging Vybe APIs for real-time Solana data:
 
+- `/pulse <address>`: Quick wallet analysis (total value, token count, top tokens).
+- `/whale <address>`: Tracks activity of known whale accounts.
+- `/holdings <address>`: Detailed portfolio overview (token names, symbols, amounts).
+- `/transfers <address>`: Recent token transfer transactions (amount, value, sender/receiver).
+- `/volume <token>`: 7-day token transfer volume in USD (supports symbols like SOL, USDC).
+- `/history <token>`: 5-day price trends (open/close prices, supports symbols).
+- `/alert <token> <condition>`: Custom volume-based alerts (e.g., `/alert USDC >1000`).
+- **Inline Keyboard**: Interactive navigation for all commands.
+- **Vybe Network Links**: Directs users to [Vybe Network](https://alpha.vybenetwork.com) for deeper analytics.
 
+---
 
-
-
-/pulse
-
-: Quick wallet analysis (total value, token count, top tokens).
-
-
-
-/whale
-
-: Tracks activity of known whale accounts.
-
-
-
-/holdings
-
-: Detailed portfolio overview (token names, symbols, amounts).
-
-
-
-/transfers
-
-: Recent token transfer transactions (amount, value, sender/receiver).
-
-
-
-/volume : 7-day token transfer volume in USD (supports symbols like SOL, USDC).
-
-
-
-/history : 5-day price trends (open/close prices, supports symbols).
-
-
-
-/alert : Custom volume-based alerts (e.g., /alert USDC >1000).
-
-
-
-Inline Keyboard: Interactive navigation for all commands.
-
-
-
-Vybe Network Links: Directs users to https://alpha.vybenetwork.com for deeper analytics.
-
-Metrics Provided
+## Metrics Provided
 
 The bot delivers key Solana blockchain metrics via Vybe APIs:
 
+- **Wallet Balances**: Total USD value and token count (`/account/token-balance/{ownerAddress}`).
+- **Whale Activity**: Labeled whale accounts with metadata (`/account/known-accounts`).
+- **Token Transfers**: Transaction details (amount, USD value, addresses, timestamp) (`/token/transfers`).
+- **Token Volume**: Aggregated USD volume over 7 days (`/token/{mintAddress}/transfer-volume`).
+- **Price History**: Daily OHLC prices for tokens (`/price/{mintAddress}/token-ohlcv`).
+- **Alerts**: Real-time volume monitoring with user-defined thresholds.
 
+---
 
+## Prerequisites
 
+- **Python**: 3.8 or higher
+- **Operating System**: Windows, macOS, or Linux
+- **Telegram Account**: To interact with the bot
+- **Render Account**: For deployment (free tier available)
+- **Vybe API Key**: Obtain from [@ericvybe](https://t.me/ericvybe) on Telegram
+- **Bot Token**: Create via [@BotFather](https://t.me/BotFather) on Telegram
+- **Dependencies**:
+  - `pyTelegramBotAPI`: Telegram bot framework
+  - `requests`: HTTP requests for Vybe APIs
+  - `python-dotenv`: Environment variable management
+  - `schedule`: Periodic alert checks
 
-Wallet Balances: Total USD value and token count (/account/token-balance/{ownerAddress}).
+---
 
+## Installation
 
+1. **Clone the Repository:**
 
-Whale Activity: Labeled whale accounts with metadata (/account/known-accounts).
+   ```sh
+   git clone https://github.com/japhetjohn/marketpulsebot.git
+   cd marketpulsebot
+   ```
 
+2. **Install Dependencies:**
 
+   ```sh
+   pip install pyTelegramBotAPI requests python-dotenv schedule
+   ```
 
-Token Transfers: Transaction details (amount, USD value, addresses, timestamp) (/token/transfers).
+   For Windows, use the same command. For macOS/Linux, consider a virtual environment:
 
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # Linux/macOS
+   venv\Scripts\activate     # Windows
+   pip install pyTelegramBotAPI requests python-dotenv schedule
+   ```
 
+3. **Configure Environment:**
+   Create a `.env` file in the project root:
 
-Token Volume: Aggregated USD volume over 7 days (/token/{mintAddress}/transfer-volume).
+   ```env
+   BOT_TOKEN=your_bot_token_from_botfather
+   VYBE_API_KEY=your_vybe_api_key
+   ```
 
+4. **Run the Bot:**
+   ```sh
+   python bot.py
+   ```
 
+---
 
-Price History: Daily OHLC prices for tokens (/price/{mintAddress}/token-ohlcv).
+## Usage
 
+- Add [@MarketPulseTGBot](https://t.me/MarketPulseTGBot) to a Telegram group or chat directly.
+- Use commands with valid Solana addresses or token inputs:
+  - **Wallet Address Example:** `DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa`
+  - **Token Symbol Example:** `SOL`, `USDC`
+  - **Token Mint Example:** `So11111111111111111111111111111111111111112` (SOL)
 
+### Commands
 
-Alerts: Real-time volume monitoring with user-defined thresholds.
+- `/start`: Displays welcome message and inline keyboard.
+- `/pulse <address>`: Wallet summary.
+- `/whale <address>`: Whale activity check.
+- `/holdings <address>`: Token holdings.
+- `/transfers <address>`: Recent transfers.
+- `/volume <token>`: Token volume stats (e.g., `/volume SOL`).
+- `/history <token>`: Price history (e.g., `/history USDC`).
+- `/alert <token> <condition>`: Set volume alerts (e.g., `/alert USDC >1000`).
 
-Prerequisites
+---
 
+## Example Outputs
 
+Below are formatted outputs for key commands, simulating Telegram responses from [@MarketPulseTGBot](https://t.me/MarketPulseTGBot):
 
-
-
-Python: 3.8 or higher.
-
-
-
-Operating System: Windows, macOS, or Linux.
-
-
-
-Telegram Account: To interact with the bot.
-
-
-
-Render Account: For deployment (free tier available).
-
-
-
-Vybe API Key: Obtain from @ericvybe on Telegram.
-
-
-
-Bot Token: Create via @BotFather on Telegram.
-
-
-
-Dependencies:
-
-
-
-
-
-pyTelegramBotAPI: Telegram bot framework.
-
-
-
-requests: HTTP requests for Vybe APIs.
-
-
-
-python-dotenv: Environment variable management.
-
-
-
-schedule: Periodic alert checks.
-
-Installation
-
-
-
-
-
-Clone the Repository:
-
-git clone https://github.com/japhetjohn/marketpulsebot.git
-cd marketpulsebot
-
-
-
-Install Dependencies:
-
-pip install pyTelegramBotAPI requests python-dotenv schedule
-
-For Windows, use:
-
-pip install pyTelegramBotAPI requests python-dotenv schedule
-
-For macOS/Linux, consider a virtual environment:
-
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-venv\Scripts\activate     # Windows
-pip install pyTelegramBotAPI requests python-dotenv schedule
-
-
-
-Configure Environment: Create a .env file in the project root:
-
-BOT_TOKEN=your_bot_token_from_botfather
-VYBE_API_KEY=your_vybe_api_key
-
-
-
-Run the Bot:
-
-python bot.py
-
-Usage
-
-
-
-
-
-Add @MarketPulseTGBot to a Telegram group or chat directly.
-
-
-
-Use commands with valid Solana addresses or token inputs:
-
-
-
-
-
-Wallet Address Example: DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa
-
-
-
-Token Symbol Example: SOL, USDC
-
-
-
-Token Mint Example: So11111111111111111111111111111111111111112 (SOL)
-
-
-
-Commands:
-
-
-
-
-
-/start: Displays welcome message and inline keyboard.
-
-
-
-/pulse <address>: Wallet summary.
-
-
-
-/whale <address>: Whale activity check.
-
-
-
-/holdings <address>: Token holdings.
-
-
-
-/transfers <address>: Recent transfers.
-
-
-
-/volume <token>: Token volume stats (e.g., /volume SOL).
-
-
-
-/history <token>: Price history (e.g., /history USDC).
-
-
-
-/alert <token> <condition>: Set volume alerts (e.g., /alert USDC >1000).
-
-Example Outputs
-
-Below are formatted outputs for key commands, simulating Telegram responses from @MarketPulseTGBot:
-
+```
 /pulse DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa
 
 📊 Wallet Analysis:
@@ -349,326 +193,146 @@ Condition: Volume > $1,000.00
 Current Volume: $1,234.56
 
 🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
-
-Deployment
-
-Render
-
-
-
-
-
-Create a Render Account: Sign up at Render (free tier available).
-
-
-
-Create a New Web Service:
-
-
-
-
-
-Go to the Render Dashboard and click "New" > "Web Service".
-
-
-
-Connect your GitHub repository (e.g., https://github.com/japhetjohn/marketpulsebot).
-
-
-
-Configure the Web Service:
-
-
-
-
-
-Name: marketpulsebot
-
-
-
-Environment: Python
-
-
-
-Build Command: pip install -r requirements.txt
-
-
-
-Start Command: python bot.py
-
-
-
-Instance Type: Free or Starter (for testing).
-
-
-
-Set Environment Variables:
-
-
-
-
-
-In the Render Dashboard, go to "Environment" and add:
-
-BOT_TOKEN=your_bot_token_from_botfather
-VYBE_API_KEY=your_vybe_api_key
-
-
-
-Add Required Files:
-
-
-
-
-
-Create a requirements.txt:
-
-pyTelegramBotAPI==4.14.0
-requests==2.31.0
-python-dotenv==1.0.0
-schedule==1.2.0
-
-
-
-Ensure .gitignore excludes .env:
-
-.env
-venv/
-__pycache__/
-*.pyc
-
-
-
-Deploy:
-
-
-
-
-
-Push changes to your GitHub repository:
-
-git add .
-git commit -m "Deploy MarketPulseBot to Render"
-git push origin main
-
-
-
-Render will auto-detect the push and deploy. Monitor the build logs in the Render Dashboard.
-
-
-
-Verify Deployment:
-
-
-
-
-
-Check the deployed URL (e.g., https://marketpulsebot.onrender.com).
-
-
-
-Ensure the bot responds at @MarketPulseTGBot.
-
-
-
-View logs in the Render Dashboard for errors.
-
-Local Testing Before Deployment
-
-
-
-
-
-Run locally to verify:
-
-python bot.py
-
-
-
-Test all commands with @MarketPulseTGBot to ensure functionality.
-
-Troubleshooting
-
-
-
-
-
-Syntax Errors (e.g., Pylance: "(" was not closed):
-
-
-
-
-
-Verify code matches the latest bot.py from the repo.
-
-
-
-Check line numbers in error messages (e.g., line 275 for /history).
-
-
-
-API Errors (404, 400):
-
-
-
-
-
-Use valid Solana addresses/tokens (e.g., SOL: So11111111111111111111111111111111111111112).
-
-
-
-Verify VYBE_API_KEY.
-
-
-
-Bot Not Responding:
-
-
-
-
-
-Ensure @MarketPulseTGBot is added to a group with permissions.
-
-
-
-Check BOT_TOKEN from @BotFather.
-
-
-
-Review Render logs for crashes.
-
-
-
-Endpoint Issues:
-
-
-
-
-
-/whale: Address must be a known whale (/account/known-accounts).
-
-
-
-/transfers: Wallet must have recent transfers.
-
-
-
-/volume: Token must have volume data.
-
-
-
-Test with: /pulse DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa, /volume SOL.
-
-
-
-Alert Not Triggering:
-
-
-
-
-
-Ensure scheduler is running (run_scheduler logs).
-
-
-
-Use realistic conditions (e.g., >100 for low-volume tokens).
-
-
-
-Pylance Errors:
-
-
-
-
-
-Install Pylance in VS Code.
-
-
-
-Ensure python interpreter is set to the virtual environment.
-
-
-
-Render Deployment Issues:
-
-
-
-
-
-Check build logs for dependency errors.
-
-
-
-Ensure requirements.txt is correct.
-
-
-
-Verify environment variables in the Render Dashboard.
-
-Vybe API Integration
+```
+
+---
+
+## Deployment
+
+### Render
+
+1. **Create a Render Account:** Sign up at [Render](https://render.com) (free tier available).
+2. **Create a New Web Service:**
+   - Go to the Render Dashboard and click "New" > "Web Service".
+   - Connect your GitHub repository (e.g., https://github.com/japhetjohn/marketpulsebot).
+3. **Configure the Web Service:**
+   - Name: `marketpulsebot`
+   - Environment: Python
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `python bot.py`
+   - Instance Type: Free or Starter (for testing)
+4. **Set Environment Variables:**
+   - In the Render Dashboard, go to "Environment" and add:
+     ```env
+     BOT_TOKEN=your_bot_token_from_botfather
+     VYBE_API_KEY=your_vybe_api_key
+     ```
+5. **Add Required Files:**
+   - Create a `requirements.txt`:
+     ```txt
+     pyTelegramBotAPI==4.14.0
+     requests==2.31.0
+     python-dotenv==1.0.0
+     schedule==1.2.0
+     ```
+   - Ensure `.gitignore` excludes `.env`:
+     ```gitignore
+     .env
+     venv/
+     __pycache__/
+     *.pyc
+     ```
+6. **Deploy:**
+   - Push changes to your GitHub repository:
+     ```sh
+     git add .
+     git commit -m "Deploy MarketPulseBot to Render"
+     git push origin main
+     ```
+   - Render will auto-detect the push and deploy. Monitor the build logs in the Render Dashboard.
+7. **Verify Deployment:**
+   - Check the deployed URL (e.g., https://marketpulsebot.onrender.com).
+   - Ensure the bot responds at [@MarketPulseTGBot](https://t.me/MarketPulseTGBot).
+   - View logs in the Render Dashboard for errors.
+
+### Local Testing Before Deployment
+
+- Run locally to verify:
+  ```sh
+  python bot.py
+  ```
+- Test all commands with [@MarketPulseTGBot](https://t.me/MarketPulseTGBot) to ensure functionality.
+
+---
+
+## Troubleshooting
+
+- **Syntax Errors (e.g., Pylance: "(" was not closed):**
+  - Verify code matches the latest `bot.py` from the repo.
+  - Check line numbers in error messages (e.g., line 275 for `/history`).
+- **API Errors (404, 400):**
+  - Use valid Solana addresses/tokens (e.g., SOL: `So11111111111111111111111111111111111111112`).
+  - Verify `VYBE_API_KEY`.
+- **Bot Not Responding:**
+  - Ensure [@MarketPulseTGBot](https://t.me/MarketPulseTGBot) is added to a group with permissions.
+  - Check `BOT_TOKEN` from [@BotFather](https://t.me/BotFather).
+  - Review Render logs for crashes.
+- **Endpoint Issues:**
+  - `/whale`: Address must be a known whale (`/account/known-accounts`).
+  - `/transfers`: Wallet must have recent transfers.
+  - `/volume`: Token must have volume data.
+  - Test with: `/pulse DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa`, `/volume SOL`.
+- **Alert Not Triggering:**
+  - Ensure scheduler is running (run_scheduler logs).
+  - Use realistic conditions (e.g., `>100` for low-volume tokens).
+- **Pylance Errors:**
+  - Install Pylance in VS Code.
+  - Ensure python interpreter is set to the virtual environment.
+- **Render Deployment Issues:**
+  - Check build logs for dependency errors.
+  - Ensure `requirements.txt` is correct.
+  - Verify environment variables in the Render Dashboard.
+
+---
+
+## Vybe API Integration
 
 MarketPulseBot uses the following Vybe API endpoints:
 
-
-
-
-
-/account/token-balance/{ownerAddress}: Wallet balances (total USD value, token details).
-
-
-
-/account/known-accounts: Whale account metadata (name, labels, date added).
-
-
-
-/token/transfers: Token transfer transactions (amount, USD value, addresses, timestamp).
-
-
-
-/token/{mintAddress}/transfer-volume: Aggregated USD volume over time.
-
-
-
-/price/{mintAddress}/token-ohlcv: OHLC price data for tokens.
-
-
-
-Headers: X-API-Key: <VYBE_API_KEY>.
+- `/account/token-balance/{ownerAddress}`: Wallet balances (total USD value, token details).
+- `/account/known-accounts`: Whale account metadata (name, labels, date added).
+- `/token/transfers`: Token transfer transactions (amount, USD value, addresses, timestamp).
+- `/token/{mintAddress}/transfer-volume`: Aggregated USD volume over time.
+- `/price/{mintAddress}/token-ohlcv`: OHLC price data for tokens.
 
 All requests include error handling for HTTP status codes (400, 404, 500) and network issues, ensuring a robust user experience.
 
-Why MarketPulseBot?
+**Headers:**
+
+```
+X-API-Key: <VYBE_API_KEY>
+```
+
+---
+
+## Why MarketPulseBot?
 
 MarketPulseBot stands out in the Vybe Telegram Bot Challenge for:
 
+- **Innovation (25%)**: Token symbol support (e.g., SOL, USDC) for alerts and analytics, surpassing competitors like PhanesBot.
+- **User Experience (25%)**: Inline keyboard, loading indicators, and formatted outputs for seamless interaction.
+- **Technical Execution (25%)**: Robust error handling, efficient API calls, and Render deployment for reliability.
+- **Commercial Viability (10%)**: Links to [Vybe Network](https://alpha.vybenetwork.com) drive user engagement with Vybe’s platform.
+- **Documentation Quality (15%)**: This README provides clear setup, usage, and troubleshooting, with example outputs and deployment guides.
 
+Test it at [@MarketPulseTGBot](https://t.me/MarketPulseTGBot) and explore the code on [GitHub](https://github.com/japhetjohn/marketpulsebot).
 
+---
 
+## Contributing
 
-Innovation (25%): Token symbol support (e.g., SOL, USDC) for alerts and analytics, surpassing competitors like PhanesBot.
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
 
+---
 
-
-User Experience (25%): Inline keyboard, loading indicators, and formatted outputs for seamless interaction.
-
-
-
-Technical Execution (25%): Robust error handling, efficient API calls, and Render deployment for reliability.
-
-
-
-Commercial Viability (10%): Links to https://alpha.vybenetwork.com drive user engagement with Vybe’s platform.
-
-
-
-Documentation Quality (15%): This README provides clear setup, usage, and troubleshooting, with example outputs and deployment guides.
-
-Test it at @MarketPulseTGBot and explore the code on GitHub.
-
-License
+## License
 
 MIT License
 
 Copyright (c) 2025 Japhet John
 
-Permission is hereby granted, free of charge, to any person obtaining a copy...
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
