@@ -8,6 +8,7 @@ import time
 import schedule
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime, timezone
+import re
 
 # Load environment variables
 load_dotenv()
@@ -31,12 +32,36 @@ app = Flask(__name__)
 # Store user alerts
 user_alerts = {}
 
+# Token symbol to mint address mapping
+TOKEN_MAPPING = {
+    "SOL": "So11111111111111111111111111111111111111112",
+    "USDC": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "USDT": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+    "WETH": "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs",
+    "SRM": "SRMuApVNdxXekkYD7kqFN73JQGCZCFBZfzD61ZdWyR"
+}
+
 @app.route('/')
 def home():
     return "CryptoPulse Bot is alive!"
 
 def run_flask():
     app.run(host="0.0.0.0", port=8080, debug=False)
+
+# Helper function to validate Solana address
+def is_valid_solana_address(address):
+    # Solana addresses are 43-44 characters, base58 (alphanumeric excluding 0, O, I, l)
+    pattern = r'^[1-9A-HJ-NP-Za-km-z]{43,44}$'
+    return bool(re.match(pattern, address))
+
+# Helper function to resolve token input (symbol or address)
+def resolve_token(token):
+    token = token.upper()
+    if token in TOKEN_MAPPING:
+        return TOKEN_MAPPING[token]
+    if is_valid_solana_address(token):
+        return token
+    return None
 
 # Helper function to make API requests
 def make_vybe_request(endpoint, params=None, method="GET"):
@@ -48,10 +73,19 @@ def make_vybe_request(endpoint, params=None, method="GET"):
         else:
             response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        print(f"API Response for {endpoint}: {data}")  # Debug log
+        return data
     except requests.exceptions.HTTPError as e:
-        return {"error": f"HTTP Error: {e.response.status_code}. Please check your input."}
-    except requests.exceptions.RequestException:
+        try:
+            error_data = e.response.json()
+            error_msg = error_data.get('message', f"HTTP Error: {e.response.status_code}")
+        except ValueError:
+            error_msg = f"HTTP Error: {e.response.status_code}"
+        print(f"API Error for {endpoint}: {error_msg}")  # Debug log
+        return {"error": error_msg}
+    except requests.exceptions.RequestException as e:
+        print(f"Network Error for {endpoint}: {e}")  # Debug log
         return {"error": "Network error. Please try again later."}
 
 # Create an inline keyboard for navigation
@@ -94,6 +128,9 @@ def send_welcome(message):
 def send_wallet_analysis(message):
     try:
         wallet_address = message.text.split()[1].strip()
+        if not is_valid_solana_address(wallet_address):
+            bot.reply_to(message, "Invalid Solana address. Please provide a valid address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Fetching wallet data...")
         data = make_vybe_request(f"/account/token-balance/{wallet_address}")
         if "error" in data:
@@ -125,6 +162,9 @@ def send_wallet_analysis(message):
 def send_whale_analysis(message):
     try:
         wallet_address = message.text.split()[1].strip()
+        if not is_valid_solana_address(wallet_address):
+            bot.reply_to(message, "Invalid Solana address. Please provide a valid address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Checking whale activity...")
         params = {"ownerAddress": wallet_address}
         data = make_vybe_request("/account/known-accounts", params=params)
@@ -167,6 +207,9 @@ def send_whale_analysis(message):
 def send_holdings(message):
     try:
         wallet_address = message.text.split()[1].strip()
+        if not is_valid_solana_address(wallet_address):
+            bot.reply_to(message, "Invalid Solana address. Please provide a valid address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Fetching holdings...")
         data = make_vybe_request(f"/account/token-balance/{wallet_address}")
         if "error" in data:
@@ -196,6 +239,9 @@ def send_holdings(message):
 def send_transfers(message):
     try:
         wallet_address = message.text.split()[1].strip()
+        if not is_valid_solana_address(wallet_address):
+            bot.reply_to(message, "Invalid Solana address. Please provide a valid address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Fetching transfers...")
         params = {"walletAddress": wallet_address, "limit": 5}
         data = make_vybe_request("/token/transfers", params=params)
@@ -231,20 +277,32 @@ def send_transfers(message):
 @bot.message_handler(commands=['volume'])
 def send_token_volume(message):
     try:
-        token = message.text.split()[1].strip()
+        token_input = message.text.split()[1].strip()
+        token = resolve_token(token_input)
+        if not token:
+            bot.reply_to(message, "Invalid token. Use a token symbol (e.g., SOL, USDC) or a valid Solana mint address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Fetching volume...")
         current_time = int(time.time())
         one_week_ago = current_time - (7 * 24 * 60 * 60)
-        params = {"startTime": one_week_ago, "endTime": current_time, "interval": "1d", "limit": 7}
+        params = {"startTime": one_week_ago, "endTime": current_time}
         data = make_vybe_request(f"/token/{token}/transfer-volume", params=params)
         if "error" in data:
-            bot.edit_message_text(f"Error: {data['error']}. Ensure the token address is valid.", chat_id=message.chat.id, message_id=sent_msg.message_id)
-        elif not data or 'data' not in data or len(data['data']) == 0:
-            bot.edit_message_text(f"No volume data found for token: {token}", chat_id=message.chat.id, message_id=sent_msg.message_id)
-        else:
-            total_volume = sum(float(entry["volume"]) for entry in data["data"])
             bot.edit_message_text(
-                f"📊 *Token Volume for `{token}`*:\n\n"
+                f"Error: {data['error']}. Ensure the token is supported by Vybe Network.",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id
+            )
+        elif not data or 'data' not in data or len(data['data']) == 0:
+            bot.edit_message_text(
+                f"No volume data found for token: {token_input}. Try a different token like SOL.",
+                chat_id=message.chat.id,
+                message_id=sent_msg.message_id
+            )
+        else:
+            total_volume = sum(float(entry.get("volume", 0)) for entry in data["data"])
+            bot.edit_message_text(
+                f"📊 *Token Volume for `{token_input}`*:\n\n"
                 f"Total Volume (7 days): ${total_volume:,.2f}\n\n"
                 f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
                 chat_id=message.chat.id,
@@ -253,24 +311,28 @@ def send_token_volume(message):
                 disable_web_page_preview=True
             )
     except IndexError:
-        bot.reply_to(message, "Please provide a token address. Example: /volume <token>")
+        bot.reply_to(message, "Please provide a token. Example: /volume SOL or /volume So11111111111111111111111111111111111111112")
     except Exception as e:
         print(f"Error in /volume: {e}")
-        bot.reply_to(message, "Something went wrong. Please try again later.")
+        bot.edit_message_text("Something went wrong. Please try again later.", chat_id=message.chat.id, message_id=sent_msg.message_id)
 
 @bot.message_handler(commands=['history'])
 def send_token_history(message):
     try:
-        token = message.text.split()[1].strip()
+        token_input = message.text.split()[1].strip()
+        token = resolve_token(token_input)
+        if not token:
+            bot.reply_to(message, "Invalid token. Use a token symbol (e.g., SOL, USDC) or a valid Solana mint address (43-44 characters).")
+            return
         sent_msg = bot.reply_to(message, "Fetching price history...")
         current_time = int(time.time())
         one_week_ago = current_time - (7 * 24 * 60 * 60)
         params = {"resolution": "1d", "timeStart": one_week_ago, "timeEnd": current_time, "limit": 5}
         data = make_vybe_request(f"/price/{token}/token-ohlcv", params=params)
         if "error" in data:
-            bot.edit_message_text(f"Error: {data['error']}. Ensure the token address is valid.", chat_id=message.chat.id, message_id=sent_msg.message_id)
+            bot.edit_message_text(f"Error: {data['error']}. Ensure the token is supported by Vybe Network.", chat_id=message.chat.id, message_id=sent_msg.message_id)
         elif not data or len(data.get('data', [])) == 0:
-            bot.edit_message_text(f"No price history found for token: {token}", chat_id=message.chat.id, message_id=sent_msg.message_id)
+            bot.edit_message_text(f"No price history found for token: {token_input}. Try a different token like SOL.", chat_id=message.chat.id, message_id=sent_msg.message_id)
         else:
             history = "\n".join([
                 f"- {datetime.fromtimestamp(entry.get('time', 0), tz=timezone.utc).strftime('%Y-%m-%d')}: "
@@ -278,7 +340,7 @@ def send_token_history(message):
                 for entry in data.get('data', [])[:5]
             ])
             bot.edit_message_text(
-                f"📈 *Price History for `{token}`*:\n\n{history}\n\n"
+                f"📈 *Price History for `{token_input}`*:\n\n{history}\n\n"
                 f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
@@ -286,10 +348,10 @@ def send_token_history(message):
                 disable_web_page_preview=True
             )
     except IndexError:
-        bot.reply_to(message, "Please provide a token address. Example: /history <token>")
+        bot.reply_to(message, "Please provide a token. Example: /history SOL or /history So11111111111111111111111111111111111111112")
     except Exception as e:
         print(f"Error in /history: {e}")
-        bot.reply_to(message, "Something went wrong. Please try again later.")
+        bot.edit_message_text("Something went wrong. Please try again later.", chat_id=message.chat.id, message_id=sent_msg.message_id)
 
 @bot.message_handler(commands=['alert'])
 def set_alert(message):
@@ -298,7 +360,11 @@ def set_alert(message):
         if len(parts) < 3:
             bot.reply_to(message, "Please provide a token and condition. Example: /alert USDC >1000")
             return
-        token = parts[1].upper()
+        token_input = parts[1].strip()
+        token = resolve_token(token_input)
+        if not token:
+            bot.reply_to(message, "Invalid token. Use a token symbol (e.g., SOL, USDC) or a valid Solana mint address (43-44 characters).")
+            return
         condition = " ".join(parts[2:])
         if not any(op in condition for op in [">", "<", "=="]):
             bot.reply_to(message, "Condition must include >, <, or ==. Example: /alert USDC >1000")
@@ -306,8 +372,8 @@ def set_alert(message):
         chat_id = message.chat.id
         if chat_id not in user_alerts:
             user_alerts[chat_id] = []
-        user_alerts[chat_id].append({"token": token, "condition": condition})
-        bot.reply_to(message, f"✅ Alert set for {token} when {condition}.", reply_markup=create_inline_keyboard())
+        user_alerts[chat_id].append({"token": token, "condition": condition, "token_input": token_input})
+        bot.reply_to(message, f"✅ Alert set for {token_input} when {condition}.", reply_markup=create_inline_keyboard())
     except Exception as e:
         print(f"Error in /alert: {e}")
         bot.reply_to(message, "Something went wrong. Please try again later.")
@@ -316,6 +382,7 @@ def check_alerts():
     for chat_id, alerts in user_alerts.items():
         for alert in alerts[:]:  # Copy to avoid modification issues
             token = alert["token"]
+            token_input = alert["token_input"]
             condition = alert["condition"]
             current_time = int(time.time())
             one_day_ago = current_time - (24 * 60 * 60)
@@ -330,7 +397,7 @@ def check_alerts():
                 if (op == ">" and volume > value) or (op == "<" and volume < value) or (op == "==" and abs(volume - value) < 0.01):
                     bot.send_message(
                         chat_id,
-                        f"🚨 *Alert Triggered for {token}*:\n"
+                        f"🚨 *Alert Triggered for {token_input}*:\n"
                         f"Condition: Volume {op} ${value:,.2f}\n"
                         f"Current Volume: ${volume:,.2f}\n\n"
                         f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
