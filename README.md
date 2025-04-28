@@ -156,7 +156,7 @@ Later, if triggered:
 Condition: Volume > $1,000.00
 Current Volume: $1,234.56
 
-🔍 View more at [Vybe Network](https://vybenetwork.com/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
+🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
 
 Deployment
 render
@@ -227,7 +227,7 @@ MarketPulse Bot stands out in the Vybe Telegram Bot Challenge for:
 Innovation (25%): Secure alert parsing and detailed wallet summaries, surpassing competitors like PhanesBot.
 User Experience (25%): Inline keyboard, loading indicators, and formatted outputs for seamless interaction.
 Technical Execution (25%): Robust error handling, efficient API calls, and Heroku deployment for reliability.
-Commercial Viability (10%): Links to https://vybenetwork.com drive user engagement with Vybe’s platform.
+Commercial Viability (10%): Links to https://alpha.vybenetwork.com drive user engagement with Vybe’s platform.
 Documentation Quality (15%): This README provides clear setup, usage, and troubleshooting, with example outputs and deployment guides.
 
 Test it at @CryptoPulsetgBot and explore the code on GitHub.

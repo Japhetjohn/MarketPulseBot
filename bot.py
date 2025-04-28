@@ -86,7 +86,7 @@ def send_welcome(message):
         "• /volume <token> - Token volume stats\n"
         "• /history <token> - Price trends\n"
         "• /alert <token> <condition> - Custom alerts\n\n"
-        "🔍 Powered by [Vybe Network](https://vybenetwork.com)"
+        "🔍 Powered by [Vybe Network](https://alpha.vybenetwork.com)"
     )
     bot.reply_to(message, welcome_message, parse_mode="Markdown", disable_web_page_preview=True, reply_markup=create_inline_keyboard())
 
@@ -109,7 +109,7 @@ def send_wallet_analysis(message):
                 f"- Total Value: ${float(total_value):,.2f}\n"
                 f"- Total Tokens: {token_count}\n"
                 f"- Top Tokens:\n{top_tokens}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/address/{wallet_address})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -133,7 +133,7 @@ def send_whale_analysis(message):
         elif not data or len(data.get('accounts', [])) == 0:
             bot.edit_message_text(
                 f"No whale activity found for wallet: {wallet_address}. Try a known whale address.\n\n"
-                f"🔍 Explore tokens at [Vybe Network](https://vybenetwork.com)",
+                f"🔍 Explore tokens at [Vybe Network](https://alpha.vybenetwork.com)",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -151,7 +151,7 @@ def send_whale_analysis(message):
             ])
             bot.edit_message_text(
                 f"🐋 *Whale Activity for `{wallet_address}`*:\n\n{whale_info}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/address/{wallet_address})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -180,7 +180,7 @@ def send_holdings(message):
             ])
             bot.edit_message_text(
                 f"💰 *Token Holdings*:\n{holdings}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/address/{wallet_address})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -216,7 +216,7 @@ def send_transfers(message):
             ])
             bot.edit_message_text(
                 f"🔄 *Recent Transfers for `{wallet_address}`*:\n\n{transfers}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/address/{wallet_address})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/address/{wallet_address})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -246,7 +246,7 @@ def send_token_volume(message):
             bot.edit_message_text(
                 f"📊 *Token Volume for `{token}`*:\n\n"
                 f"Total Volume (7 days): ${total_volume:,.2f}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -279,7 +279,7 @@ def send_token_history(message):
             ])
             bot.edit_message_text(
                 f"📈 *Price History for `{token}`*:\n\n{history}\n\n"
-                f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
                 chat_id=message.chat.id,
                 message_id=sent_msg.message_id,
                 parse_mode="Markdown",
@@ -333,7 +333,7 @@ def check_alerts():
                         f"🚨 *Alert Triggered for {token}*:\n"
                         f"Condition: Volume {op} ${value:,.2f}\n"
                         f"Current Volume: ${volume:,.2f}\n\n"
-                        f"🔍 View more at [Vybe Network](https://vybenetwork.com/token/{token})",
+                        f"🔍 View more at [Vybe Network](https://alpha.vybenetwork.com/token/{token})",
                         parse_mode="Markdown",
                         disable_web_page_preview=True
                     )
