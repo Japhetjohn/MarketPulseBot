@@ -300,7 +300,7 @@ All requests include error handling for HTTP status codes (400, 404, 500) and ne
 **Headers:**
 
 ```
-X-API-Key: <VYBE_API_KEY>
+VYBE_API_KEY: <VYBE_API_KEY>
 ```
 
 ---
