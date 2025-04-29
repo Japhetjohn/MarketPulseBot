@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarketPulseBot Documentation</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body class="min-h-screen bg-zinc-950 text-zinc-100 font-sans antialiased">
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm"
+    >
+      <div class="container flex h-16 items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="bot" class="h-6 w-6 text-emerald-500"></i>
+          <h1 class="text-xl font-bold">MarketPulseBot</h1>
+        </div>
+        <div class="flex items-center gap-4 nav-links">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#installation" class="nav-link">Installation</a>
+          <a href="#usage" class="nav-link">Usage</a>
+          <a href="#deployment" class="nav-link">Deployment</a>
+          <a
+            href="https://github.com/japhetjohn/marketpulsebot"
+            target="_blank"
+            class="btn btn-outline"
+          >
+            <i data-lucide="github" class="h-4 w-4"></i>
+            GitHub
+          </a>
+        </div>
+        <button class="mobile-menu-btn" aria-label="Toggle menu">
+          <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu hidden">
+      <nav class="container py-4">
+        <a href="#features" class="mobile-link">Features</a>
+        <a href="#installation" class="mobile-link">Installation</a>
+        <a href="#usage" class="mobile-link">Usage</a>
+        <a href="#deployment" class="mobile-link">Deployment</a>
+        <a
+          href="https://github.com/japhetjohn/marketpulsebot"
+          target="_blank"
+          class="mobile-link"
+          >GitHub</a
+        >
+      </nav>
+    </div>
+
+    <!-- Hero -->
+    <section
+      class="border-b border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 py-20"
+    >
+      <div class="container">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="badge badge-emerald mb-4"
+            >Vybe Telegram Bot Challenge</span
+          >
+          <h1
+            class="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl"
+          >
+            MarketPulseBot
+          </h1>
+          <p class="mb-8 text-xl text-zinc-400">
+            Real-time Solana blockchain analytics delivered directly to Telegram
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <a href="#installation" class="btn btn-primary">
+              Get Started
+              <i data-lucide="arrow-down" class="h-5 w-5"></i>
+            </a>
+            <a
+              href="https://t.me/MarketPulseTGBot"
+              target="_blank"
+              class="btn btn-outline"
+            >
+              <i data-lucide="bot" class="h-6 w-6"></i>
+              Try the Bot
+            </a>
+          </div>
+          <div class="mt-6">
+            <span class="badge badge-outline">MIT License</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="border-b border-zinc-800 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Features</h2>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="wallet" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Wallet Analysis</h3>
+              <p class="text-zinc-400">
+                Quick wallet analysis with total value, token count, and top
+                tokens using the <code>/pulse</code> command.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="database" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Whale Tracking</h3>
+              <p class="text-zinc-400">
+                Track activity of known whale accounts with metadata and labels
+                using the <code>/whale</code> command.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="layout-dashboard" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Portfolio Overview</h3>
+              <p class="text-zinc-400">
+                Detailed portfolio overview with token names, symbols, and
+                amounts using the <code>/holdings</code> command.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="arrow-right" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Token Transfers</h3>
+              <p class="text-zinc-400">
+                Recent token transfer transactions with amount, value, and
+                addresses using the <code>/transfers</code> command.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="history" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Price Trends</h3>
+              <p class="text-zinc-400">
+                5-day price trends with open/close prices for tokens using the
+                <code>/history</code> command.
+              </p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="p-6">
+              <div
+                class="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="alert-triangle" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-2 text-xl font-bold">Custom Alerts</h3>
+              <p class="text-zinc-400">
+                Set custom volume-based alerts for tokens using the
+                <code>/alert</code> command.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics -->
+    <section class="border-b border-zinc-800 bg-zinc-900 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Metrics Provided</h2>
+        <div class="mx-auto max-w-3xl space-y-6">
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-2 text-xl font-bold">Wallet Balances</h3>
+            <p class="text-zinc-400">
+              Total USD value and token count via
+              <code>/account/token-balance/{ownerAddress}</code>
+            </p>
+          </div>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-2 text-xl font-bold">Whale Activity</h3>
+            <p class="text-zinc-400">
+              Labeled whale accounts with metadata via
+              <code>/account/known-accounts</code>
+            </p>
+          </div>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-2 text-xl font-bold">Token Transfers</h3>
+            <p class="text-zinc-400">
+              Transaction details (amount, USD value, addresses, timestamp) via
+              <code>/token/transfers</code>
+            </p>
+          </div>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-2 text-xl font-bold">Token Volume</h3>
+            <p class="text-zinc-400">
+              Aggregated USD volume over 7 days via
+              <code>/token/{mintAddress}/transfer-volume</code>
+            </p>
+          </div>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-2 text-xl font-bold">Price History</h3>
+            <p class="text-zinc-400">
+              Daily OHLC prices for tokens via
+              <code>/price/{mintAddress}/token-ohlcv</code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="installation" class="border-b border-zinc-800 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Installation</h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="tabs">
+            <div class="tabs-list">
+              <button class="tab-trigger active" data-tab="clone">
+                Clone Repository
+              </button>
+              <button class="tab-trigger" data-tab="dependencies">
+                Install Dependencies
+              </button>
+              <button class="tab-trigger" data-tab="configure">
+                Configure Environment
+              </button>
+            </div>
+            <div class="tab-content active" id="clone">
+              <h3 class="mb-4 text-xl font-bold">Clone the Repository</h3>
+              <div class="rounded-md bg-zinc-950 p-4">
+                <code class="text-sm text-zinc-300">
+                  git clone https://github.com/japhetjohn/marketpulsebot.git<br />
+                  cd marketpulsebot
+                </code>
+              </div>
+            </div>
+            <div class="tab-content" id="dependencies">
+              <h3 class="mb-4 text-xl font-bold">Install Dependencies</h3>
+              <div class="rounded-md bg-zinc-950 p-4">
+                <code class="text-sm text-zinc-300">
+                  pip install pyTelegramBotAPI requests python-dotenv schedule
+                </code>
+              </div>
+              <p class="mt-4 text-zinc-400">
+                For macOS/Linux, consider using a virtual environment:
+              </p>
+              <div class="mt-2 rounded-md bg-zinc-950 p-4">
+                <code class="text-sm text-zinc-300">
+                  python -m venv venv<br />
+                  source venv/bin/activate # Linux/macOS<br />
+                  venv\Scripts\activate # Windows<br />
+                  pip install pyTelegramBotAPI requests python-dotenv schedule
+                </code>
+              </div>
+            </div>
+            <div class="tab-content" id="configure">
+              <h3 class="mb-4 text-xl font-bold">Configure Environment</h3>
+              <p class="mb-4 text-zinc-400">
+                Create a <code>.env</code> file in the project root:
+              </p>
+              <div class="rounded-md bg-zinc-950 p-4">
+                <code class="text-sm text-zinc-300">
+                  BOT_TOKEN=your_bot_token_from_botfather<br />
+                  VYBE_API_KEY=your_vybe_api_key
+                </code>
+              </div>
+              <p class="mt-4 text-zinc-400">Run the bot:</p>
+              <div class="mt-2 rounded-md bg-zinc-950 p-4">
+                <code class="text-sm text-zinc-300">python bot.py</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Usage -->
+    <section id="usage" class="border-b border-zinc-800 bg-zinc-900 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Usage</h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="mb-8 rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-4 text-xl font-bold">Getting Started</h3>
+            <p class="text-zinc-400">
+              Add
+              <a
+                href="https://t.me/MarketPulseTGBot"
+                target="_blank"
+                class="text-emerald-500 hover:underline"
+                >@MarketPulseTGBot</a
+              >
+              to a Telegram group or chat directly.
+            </p>
+            <p class="mt-2 text-zinc-400">
+              Use commands with valid Solana addresses or token inputs:
+            </p>
+            <ul class="mt-2 list-inside list-disc space-y-1 text-zinc-400">
+              <li>
+                <strong>Wallet Address Example:</strong>
+                <code>DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa</code>
+              </li>
+              <li>
+                <strong>Token Symbol Example:</strong> <code>SOL</code>,
+                <code>USDC</code>
+              </li>
+              <li>
+                <strong>Token Mint Example:</strong>
+                <code>So11111111111111111111111111111111111111112</code> (SOL)
+              </li>
+            </ul>
+          </div>
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <h3 class="mb-4 text-xl font-bold">Available Commands</h3>
+            <div class="space-y-4">
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/start</code>
+                <p class="mt-1 text-zinc-400">
+                  Displays welcome message and inline keyboard.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/pulse &lt;address&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Wallet summary with total value and token count.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/whale &lt;address&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Whale activity check for known accounts.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/holdings &lt;address&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Detailed token holdings with names and amounts.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/transfers &lt;address&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Recent token transfers with transaction details.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/volume &lt;token&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Token volume stats over 7 days (e.g.,
+                  <code>/volume SOL</code>).
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/history &lt;token&gt;</code>
+                <p class="mt-1 text-zinc-400">
+                  Price history over 5 days (e.g., <code>/history USDC</code>).
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500"
+                  >/alert &lt;token&gt; &lt;condition&gt;</code
+                >
+                <p class="mt-1 text-zinc-400">
+                  Set volume alerts (e.g., <code>/alert USDC &gt;1000</code>).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Example Outputs -->
+    <section class="border-b border-zinc-800 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Example Outputs</h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="example-tabs">
+            <div class="tabs-list">
+              <button class="tab-trigger active" data-tab="ex-pulse">
+                Pulse
+              </button>
+              <button class="tab-trigger" data-tab="ex-transfers">
+                Transfers
+              </button>
+              <button class="tab-trigger" data-tab="ex-volume">Volume</button>
+              <button class="tab-trigger" data-tab="ex-history">History</button>
+            </div>
+            <div class="tab-content active" id="ex-pulse">
+              <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+                <div class="mb-2 font-mono text-sm text-emerald-500">
+                  /pulse DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa
+                </div>
+                <div class="rounded-lg bg-zinc-950 p-4 text-zinc-300">
+                  <p class="font-bold">📊 Wallet Analysis:</p>
+                  <ul class="mt-2 list-inside list-none space-y-1">
+                    <li>- Total Value: $0.50</li>
+                    <li>- Total Tokens: 1</li>
+                    <li>- Top Tokens:</li>
+                    <li class="ml-4">- USD Coin (USDC): 0.50 tokens</li>
+                  </ul>
+                  <p class="mt-4">
+                    🔍 View more at
+                    <a
+                      href="https://alpha.vybenetwork.com/address/DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa"
+                      target="_blank"
+                      class="text-emerald-500 hover:underline"
+                      >Vybe Network</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="ex-transfers">
+              <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+                <div class="mb-2 font-mono text-sm text-emerald-500">
+                  /transfers DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa
+                </div>
+                <div class="rounded-lg bg-zinc-950 p-4 text-zinc-300">
+                  <p class="font-bold">
+                    🔄 Recent Transfers for
+                    `DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa`:
+                  </p>
+                  <p class="mt-4 font-bold">💸 Transfer:</p>
+                  <ul class="mt-2 list-inside list-none space-y-1">
+                    <li>
+                      - Token: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+                    </li>
+                    <li>- Amount: 0.50 tokens</li>
+                    <li>- Value: $0.50</li>
+                    <li>- From: `DVDXQgzc...`</li>
+                    <li>- To: `ABC12345...`</li>
+                    <li>- Date: Apr 27, 2025 10:30 AM</li>
+                  </ul>
+                  <p class="mt-4">
+                    🔍 View more at
+                    <a
+                      href="https://alpha.vybenetwork.com/address/DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa"
+                      target="_blank"
+                      class="text-emerald-500 hover:underline"
+                      >Vybe Network</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="ex-volume">
+              <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+                <div class="mb-2 font-mono text-sm text-emerald-500">
+                  /volume SOL
+                </div>
+                <div class="rounded-lg bg-zinc-950 p-4 text-zinc-300">
+                  <p class="font-bold">📊 Token Volume for `SOL`:</p>
+                  <p class="mt-2">Total Volume (7 days): $1,234,567.89</p>
+                  <p class="mt-4">
+                    🔍 View more at
+                    <a
+                      href="https://alpha.vybenetwork.com/token/So11111111111111111111111111111111111111112"
+                      target="_blank"
+                      class="text-emerald-500 hover:underline"
+                      >Vybe Network</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="tab-content" id="ex-history">
+              <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+                <div class="mb-2 font-mono text-sm text-emerald-500">
+                  /history USDC
+                </div>
+                <div class="rounded-lg bg-zinc-950 p-4 text-zinc-300">
+                  <p class="font-bold">📈 Price History for `USDC`:</p>
+                  <ul class="mt-2 list-inside list-none space-y-1">
+                    <li>- 2025-04-23: Open: $1.00, Close: $1.01</li>
+                    <li>- 2025-04-24: Open: $1.01, Close: $1.00</li>
+                    <li>- 2025-04-25: Open: $1.00, Close: $1.02</li>
+                    <li>- 2025-04-26: Open: $1.02, Close: $1.01</li>
+                    <li>- 2025-04-27: Open: $1.01, Close: $1.00</li>
+                  </ul>
+                  <p class="mt-4">
+                    🔍 View more at
+                    <a
+                      href="https://alpha.vybenetwork.com/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+                      target="_blank"
+                      class="text-emerald-500 hover:underline"
+                      >Vybe Network</a
+                    >
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deployment -->
+    <section id="deployment" class="border-b border-zinc-800 bg-zinc-900 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Deployment</h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <div class="flex items-center gap-2">
+              <i data-lucide="server" class="h-5 w-5 text-emerald-500"></i>
+              <h3 class="text-xl font-bold">Render Deployment</h3>
+            </div>
+            <div class="mt-6 space-y-4">
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">1. Create a Render Account</h4>
+                <p class="mt-1 text-zinc-400">
+                  Sign up at
+                  <a
+                    href="https://render.com"
+                    target="_blank"
+                    class="text-emerald-500 hover:underline"
+                    >Render</a
+                  >
+                  (free tier available).
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">2. Create a New Web Service</h4>
+                <p class="mt-1 text-zinc-400">
+                  Go to the Render Dashboard and click "New" &gt; "Web Service".
+                  Connect your GitHub repository.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">3. Configure the Web Service</h4>
+                <ul class="mt-1 list-inside list-disc space-y-1 text-zinc-400">
+                  <li>Name: <code>marketpulsebot</code></li>
+                  <li>Environment: Python</li>
+                  <li>
+                    Build Command: <code>pip install -r requirements.txt</code>
+                  </li>
+                  <li>Start Command: <code>python bot.py</code></li>
+                  <li>Instance Type: Free or Starter (for testing)</li>
+                </ul>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">4. Set Environment Variables</h4>
+                <p class="mt-1 text-zinc-400">
+                  In the Render Dashboard, go to "Environment" and add:
+                </p>
+                <div class="mt-2 rounded-md bg-zinc-950 p-3">
+                  <code class="text-sm text-zinc-300">
+                    BOT_TOKEN=your_bot_token_from_botfather<br />
+                    VYBE_API_KEY=your_vybe_api_key
+                  </code>
+                </div>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">5. Add Required Files</h4>
+                <p class="mt-1 text-zinc-400">
+                  Create a <code>requirements.txt</code>:
+                </p>
+                <div class="mt-2 rounded-md bg-zinc-950 p-3">
+                  <code class="text-sm text-zinc-300">
+                    pyTelegramBotAPI==4.14.0<br />
+                    requests==2.31.0<br />
+                    python-dotenv==1.0.0<br />
+                    schedule==1.2.0
+                  </code>
+                </div>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">6. Deploy</h4>
+                <p class="mt-1 text-zinc-400">
+                  Push changes to your GitHub repository:
+                </p>
+                <div class="mt-2 rounded-md bg-zinc-950 p-3">
+                  <code class="text-sm text-zinc-300">
+                    git add .<br />
+                    git commit -m "Deploy MarketPulseBot to Render"<br />
+                    git push origin main
+                  </code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="border-b border-zinc-800 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">Troubleshooting</h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <div class="flex items-center gap-2">
+              <i
+                data-lucide="alert-triangle"
+                class="h-5 w-5 text-amber-500"
+              ></i>
+              <h3 class="text-xl font-bold">Common Issues</h3>
+            </div>
+            <div class="mt-6 space-y-4">
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">Syntax Errors</h4>
+                <p class="mt-1 text-zinc-400">
+                  Verify code matches the latest <code>bot.py</code> from the
+                  repo. Check line numbers in error messages (e.g., line 275 for
+                  <code>/history</code>).
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">API Errors (404, 400)</h4>
+                <p class="mt-1 text-zinc-400">
+                  Use valid Solana addresses/tokens (e.g., SOL:
+                  <code>So11111111111111111111111111111111111111112</code>).
+                  Verify <code>VYBE_API_KEY</code>.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">Bot Not Responding</h4>
+                <p class="mt-1 text-zinc-400">
+                  Ensure
+                  <a
+                    href="https://t.me/MarketPulseTGBot"
+                    target="_blank"
+                    class="text-emerald-500 hover:underline"
+                    >@MarketPulseTGBot</a
+                  >
+                  is added to a group with permissions. Check
+                  <code>BOT_TOKEN</code> from
+                  <a
+                    href="https://t.me/BotFather"
+                    target="_blank"
+                    class="text-emerald-500 hover:underline"
+                    >@BotFather</a
+                  >. Review Render logs for crashes.
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <h4 class="font-bold">Endpoint Issues</h4>
+                <p class="mt-1 text-zinc-400">
+                  <code>/whale</code>: Address must be a known whale
+                  (<code>/account/known-accounts</code>).<br />
+                  <code>/transfers</code>: Wallet must have recent transfers.<br />
+                  <code>/volume</code>: Token must have volume data.<br />
+                  Test with:
+                  <code
+                    >/pulse DVDXQgzcsYU9BthFXWyAMvDxjr8LMiHfLCUnhUGQrMAa</code
+                  >, <code>/volume SOL</code>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vybe API Integration -->
+    <section class="border-b border-zinc-800 bg-zinc-900 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">
+          Vybe API Integration
+        </h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="rounded-lg border border-zinc-800 bg-zinc-950 p-6">
+            <div class="flex items-center gap-2">
+              <i data-lucide="code" class="h-5 w-5 text-emerald-500"></i>
+              <h3 class="text-xl font-bold">API Endpoints</h3>
+            </div>
+            <div class="mt-6 space-y-4">
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500"
+                  >/account/token-balance/{ownerAddress}</code
+                >
+                <p class="mt-1 text-zinc-400">
+                  Wallet balances (total USD value, token details)
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/account/known-accounts</code>
+                <p class="mt-1 text-zinc-400">
+                  Whale account metadata (name, labels, date added)
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500">/token/transfers</code>
+                <p class="mt-1 text-zinc-400">
+                  Token transfer transactions (amount, USD value, addresses,
+                  timestamp)
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500"
+                  >/token/{mintAddress}/transfer-volume</code
+                >
+                <p class="mt-1 text-zinc-400">
+                  Aggregated USD volume over time
+                </p>
+              </div>
+              <div class="rounded-md bg-zinc-900 p-4">
+                <code class="text-emerald-500"
+                  >/price/{mintAddress}/token-ohlcv</code
+                >
+                <p class="mt-1 text-zinc-400">OHLC price data for tokens</p>
+              </div>
+            </div>
+            <div class="mt-6">
+              <h4 class="font-bold">Headers</h4>
+              <div class="mt-2 rounded-md bg-zinc-900 p-4">
+                <code class="text-sm text-zinc-300"
+                  >VYBE_API_KEY: &lt;VYBE_API_KEY&gt;</code
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why MarketPulseBot -->
+    <section class="border-b border-zinc-800 py-20">
+      <div class="container">
+        <h2 class="mb-12 text-center text-3xl font-bold">
+          Why MarketPulseBot?
+        </h2>
+        <div class="mx-auto max-w-3xl">
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="settings" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mt-4 text-xl font-bold">Innovation </h3>
+              <p class="mt-2 text-zinc-400">
+                Token symbol support (e.g., SOL, USDC) for alerts and analytics,
+                surpassing competitors like PhanesBot.
+              </p>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="layout-dashboard" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mt-4 text-xl font-bold">User Experience</h3>
+              <p class="mt-2 text-zinc-400">
+                Inline keyboard, loading indicators, and formatted outputs for
+                seamless interaction.
+              </p>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="code" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mt-4 text-xl font-bold">Technical Execution </h3>
+              <p class="mt-2 text-zinc-400">
+                Robust error handling, efficient API calls, and Render
+                deployment for reliability.
+              </p>
+            </div>
+            <div class="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+              >
+                <i data-lucide="file-code" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mt-4 text-xl font-bold">Documentation </h3>
+              <p class="mt-2 text-zinc-400">
+                Clear setup, usage, and troubleshooting, with example outputs
+                and deployment guides.
+              </p>
+            </div>
+          </div>
+          <div class="mt-8 flex justify-center">
+            <a
+              href="https://t.me/MarketPulseTGBot"
+              target="_blank"
+              class="btn btn-primary"
+            >
+              <i data-lucide="bot" class="h-8 w-8"></i>
+              Try the Bot
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800 py-12">
+      <div class="container">
+        <div
+          class="flex flex-col items-center justify-between gap-6 md:flex-row"
+        >
+          <div class="flex items-center gap-2">
+            <i
+              data-lucide="bot"
+              class="h-5 w-5 text-emerald-500"
+            ></i>
+            <span class="text-lg font-bold">MarketPulseBot</span>
+          </div>
+          <div class="text-center text-sm text-zinc-400 md:text-right">
+            <p>
+              © <span id="current-year"></span> Japhet John | Wizzyszn. All rights
+              reserved.
+            </p>
+            <p class="mt-1">
+              <a
+                href="https://github.com/japhetjohn/marketpulsebot/blob/main/LICENSE"
+                target="_blank"
+                class="text-emerald-500 hover:underline"
+              >
+                MIT License
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top">
+      <i data-lucide="chevron-up" class="h-5 w-5"></i>
+    </button>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-MarketPulseBot is a Telegram bot for the Vybe Telegram Bot Challenge, delivering real-time Solana blockchain analytics using Vybe Network APIs. It provides wallet analysis, whale tracking, token transfers, volume stats, price trends, and custom alerts, with a user-friendly inline keyboard and robust error handling. Hosted on Render for 24/7 availability, it’s open-source (MIT) and designed for traders, analysts, and Solana enthusiasts.
+MarketPulseBot is a Telegram bot for the Vybe Telegram Bot Challenge, delivering real-time Solana blockchain analytics using Vybe Network APIs. It provides wallet analysis, whale tracking, token transfers, volume stats, price trends, and custom alerts, with a user-friendly inline keyboard and robust error handling. The project now includes a web frontend interface for enhanced user interaction. Hosted on Render for 24/7 availability, it's open-source (MIT) and designed for traders, analysts, and Solana enthusiasts.
 
 ---
 
@@ -25,7 +25,9 @@ MarketPulseBot is a Telegram bot for the Vybe Telegram Bot Challenge, delivering
 
 ## Features
 
-MarketPulseBot offers the following commands, each leveraging Vybe APIs for real-time Solana data:
+MarketPulseBot offers the following features:
+
+### Telegram Bot Commands
 
 - `/pulse <address>`: Quick wallet analysis (total value, token count, top tokens).
 - `/whale <address>`: Tracks activity of known whale accounts.
@@ -36,6 +38,13 @@ MarketPulseBot offers the following commands, each leveraging Vybe APIs for real
 - `/alert <token> <condition>`: Custom volume-based alerts (e.g., `/alert USDC >1000`).
 - **Inline Keyboard**: Interactive navigation for all commands.
 - **Vybe Network Links**: Directs users to [Vybe Network](https://alpha.vybenetwork.com) for deeper analytics.
+
+### Web Frontend Interface
+
+- **Interactive Dashboard**: Access all bot features through a modern web interface
+- **Real-time Updates**: Live data updates without page refresh
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **User-friendly Interface**: Clean and intuitive design for easy navigation
 
 ---
 
@@ -60,11 +69,13 @@ The bot delivers key Solana blockchain metrics via Vybe APIs:
 - **Render Account**: For deployment (free tier available)
 - **Vybe API Key**: Obtain from [@ericvybe](https://t.me/ericvybe) on Telegram
 - **Bot Token**: Create via [@BotFather](https://t.me/BotFather) on Telegram
+- **Web Browser**: Modern browser with JavaScript enabled
 - **Dependencies**:
   - `pyTelegramBotAPI`: Telegram bot framework
   - `requests`: HTTP requests for Vybe APIs
   - `python-dotenv`: Environment variable management
   - `schedule`: Periodic alert checks
+  - Static files served from `public/` directory
 
 ---
 
@@ -100,14 +111,27 @@ The bot delivers key Solana blockchain metrics via Vybe APIs:
    VYBE_API_KEY=your_vybe_api_key
    ```
 
-4. **Run the Bot:**
+4. **Set Up Frontend:**
+
+   ```sh
+   # The frontend files are located in the public directory
+   public/
+   ├── index.html    # Main HTML file
+   ├── styles.css    # CSS styles
+   └── script.js     # JavaScript functionality
+   ```
+
+5. **Run the Bot and Frontend:**
    ```sh
    python bot.py
+   # Access the web interface at http://localhost:YOUR_PORT
    ```
 
 ---
 
 ## Usage
+
+### Telegram Bot
 
 - Add [@MarketPulseTGBot](https://t.me/MarketPulseTGBot) to a Telegram group or chat directly.
 - Use commands with valid Solana addresses or token inputs:
@@ -125,6 +149,19 @@ The bot delivers key Solana blockchain metrics via Vybe APIs:
 - `/volume <token>`: Token volume stats (e.g., `/volume SOL`).
 - `/history <token>`: Price history (e.g., `/history USDC`).
 - `/alert <token> <condition>`: Set volume alerts (e.g., `/alert USDC >1000`).
+
+### Web Interface
+
+Access the web interface through your browser:
+
+- Navigate to the deployed URL or local development server
+- Use the intuitive dashboard to:
+  - View wallet analytics
+  - Track whale activity
+  - Monitor token transfers
+  - Set up custom alerts
+  - Access historical data
+  - View real-time market trends
 
 ---
 
@@ -211,6 +248,7 @@ Current Volume: $1,234.56
    - Build Command: `pip install -r requirements.txt`
    - Start Command: `python bot.py`
    - Instance Type: Free or Starter (for testing)
+   - Static Site: The `public` directory will be served automatically
 4. **Set Environment Variables:**
    - In the Render Dashboard, go to "Environment" and add:
      ```env
@@ -300,7 +338,7 @@ All requests include error handling for HTTP status codes (400, 404, 500) and ne
 **Headers:**
 
 ```
-X-API-Key: <VYBE_API_KEY>
+VYBE_API_KEY: <VYBE_API_KEY>
 ```
 
 ---
